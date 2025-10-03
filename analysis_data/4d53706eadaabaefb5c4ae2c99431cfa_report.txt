@@ -1,0 +1,103 @@
+============================================================
+NETWORK TRAFFIC ANALYSIS REPORT
+============================================================
+Analysis Date: 2025-10-04 00:24:17
+
+SUMMARY
+--------------------
+Total Packets: 237
+Total Bytes: 64,013
+Duration: 10.65 seconds
+Unique IP Addresses: 20
+Unique MAC Addresses: 43
+Unique Hostnames: 11
+Unique Connections: 10
+
+HOST INFORMATION
+--------------------
+IP Addresses (20):
+  - 172.16.16.125
+  - 172.16.16.124
+  - 23.212.5.41
+  - 104.18.19.125
+  - 0.0.0.0
+  - 172.16.17.193
+  - 103.3.33.9
+  - 172.16.16.3
+  - 142.251.223.97
+  - 23.34.252.6
+  ... and 10 more
+
+MAC Addresses (43):
+  - 34:e1:2d:d4:36:7c
+  - ea:eb:32:76:e0:ef
+  - 16:39:5d:ed:96:75
+  - 04:d5:90:6e:91:0e
+  - 00:e9:3a:55:1f:5d
+  - d0:39:57:6f:c8:5f
+  - c0:35:32:76:4d:7d
+  - 50:bb:b5:48:73:22
+  - 70:08:94:c9:cc:bb
+  - dc:21:48:4b:dc:05
+  ... and 33 more
+
+Hostnames (11):
+  - _spotify-connect._tcp.local
+  - lb._dns-sd._udp.local
+  - _googlecast._tcp.local
+  - _rdlink._tcp.local
+  - DESKTOP-8CBI9EO._dosvc._tcp.local
+  - Parmeet’s MacBook Air._airplay._tcp.local
+  - LAPTOP-RVUK9QNA._dosvc._tcp.local
+  - _companion-link._tcp.local
+  - _quickshare._tcp.local
+  - _spotify-social-listening._tcp.local
+  ... and 1 more
+
+PROTOCOL DISTRIBUTION
+--------------------
+Ethernet: 237 packets (100.0%)
+UDP: 125 packets (52.7%)
+IP: 96 packets (40.5%)
+DNS: 56 packets (23.6%)
+TCP: 27 packets (11.4%)
+
+TOP TALKERS (by bytes)
+--------------------
+172.16.17.193: 82 packets, 38,594 bytes
+142.251.223.97: 36 packets, 17,920 bytes
+142.250.67.78: 19 packets, 17,868 bytes
+104.18.19.125: 12 packets, 1,810 bytes
+255.255.255.255: 4 packets, 1,438 bytes
+0.0.0.0: 3 packets, 1,026 bytes
+172.16.23.255: 8 packets, 887 bytes
+23.34.252.6: 7 packets, 447 bytes
+192.168.0.1: 1 packets, 412 bytes
+239.255.255.250: 2 packets, 360 bytes
+
+NETWORK CONNECTIONS
+--------------------
+172.16.17.193:55863 -> 104.18.19.125:443
+  Packets: 6, Bytes: 1299, Flags: PA, A
+104.18.19.125:443 -> 172.16.17.193:55863
+  Packets: 4, Bytes: 390, Flags: A, PA
+23.212.5.41:443 -> 172.16.17.193:55937
+  Packets: 3, Bytes: 231, Flags: PA, FA
+172.16.17.193:55937 -> 23.212.5.41:443
+  Packets: 1, Bytes: 54, Flags: A
+172.16.17.193:55506 -> 104.18.19.125:443
+  Packets: 1, Bytes: 55, Flags: A
+104.18.19.125:443 -> 172.16.17.193:55506
+  Packets: 1, Bytes: 66, Flags: A
+172.16.17.193:55940 -> 103.3.33.9:443
+  Packets: 2, Bytes: 132, Flags: S
+172.16.17.193:55941 -> 103.3.33.9:443
+  Packets: 2, Bytes: 132, Flags: S
+23.34.252.6:443 -> 172.16.17.193:55947
+  Packets: 3, Bytes: 231, Flags: PA, FA
+172.16.17.193:55947 -> 23.34.252.6:443
+  Packets: 4, Bytes: 216, Flags: A, FA
+
+============================================================
+End of Report
+============================================================

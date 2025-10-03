@@ -1,0 +1,124 @@
+============================================================
+NETWORK TRAFFIC ANALYSIS REPORT
+============================================================
+Analysis Date: 2025-10-04 00:30:57
+
+SUMMARY
+--------------------
+Total Packets: 3,569
+Total Bytes: 3,400,809
+Duration: 23.45 seconds
+Unique IP Addresses: 35
+Unique MAC Addresses: 55
+Unique Hostnames: 40
+Unique Connections: 28
+
+HOST INFORMATION
+--------------------
+IP Addresses (35):
+  - 103.3.32.22
+  - 172.16.16.213
+  - 104.18.19.125
+  - 157.240.242.60
+  - 255.255.255.255
+  - 3.213.73.189
+  - 54.80.5.161
+  - 172.16.16.238
+  - 172.16.16.172
+  - 103.3.33.8
+  ... and 25 more
+
+MAC Addresses (55):
+  - d4:61:37:61:bf:ba
+  - b0:dc:ef:32:dc:2d
+  - 76:ca:39:01:f5:f3
+  - d4:61:37:61:f8:70
+  - bc:ad:28:36:bc:6c
+  - ca:76:5b:53:9f:c9
+  - c0:35:32:54:3b:61
+  - fa:75:a3:4f:5b:b4
+  - 44:1c:a8:86:0e:59
+  - 24:2f:d0:e1:e2:23
+  ... and 45 more
+
+Hostnames (40):
+  - e180620.dscj.akamaiedge.net
+  - skift.com
+  - www.scmp.com
+  - youtube-ui.l.google.com
+  - bigthink.com
+  - www.indiatoday.in
+  - scroll.in
+  - www.bbc.com
+  - _smb._tcp.local
+  - www.popsci.com
+  ... and 30 more
+
+PROTOCOL DISTRIBUTION
+--------------------
+Ethernet: 3,569 packets (100.0%)
+IP: 3,275 packets (91.8%)
+UDP: 3,198 packets (89.6%)
+DNS: 227 packets (6.4%)
+TCP: 194 packets (5.4%)
+
+TOP TALKERS (by bytes)
+--------------------
+172.16.17.193: 3,219 packets, 3,351,246 bytes
+103.3.32.22: 2,827 packets, 3,211,633 bytes
+34.120.237.76: 56 packets, 53,963 bytes
+142.250.67.78: 43 packets, 25,317 bytes
+172.31.1.6: 123 packets, 14,401 bytes
+54.80.5.161: 21 packets, 10,162 bytes
+142.251.223.97: 22 packets, 9,515 bytes
+34.227.154.142: 20 packets, 8,115 bytes
+104.18.19.125: 35 packets, 6,261 bytes
+142.250.76.67: 11 packets, 5,228 bytes
+
+NETWORK CONNECTIONS
+--------------------
+54.80.5.161:443 -> 172.16.17.193:56339
+  Packets: 13, Bytes: 5701, Flags: A, PA, R, FA
+172.16.17.193:56339 -> 54.80.5.161:443
+  Packets: 8, Bytes: 4461, Flags: A, PA, FA
+172.16.17.193:56328 -> 34.120.237.76:443
+  Packets: 17, Bytes: 2267, Flags: PA, A
+34.120.237.76:443 -> 172.16.17.193:56328
+  Packets: 39, Bytes: 51696, Flags: A, PA
+172.16.17.193:55546 -> 3.213.73.189:443
+  Packets: 5, Bytes: 460, Flags: A, PA
+3.213.73.189:443 -> 172.16.17.193:55546
+  Packets: 6, Bytes: 1084, Flags: A, PA
+172.16.17.193:55863 -> 104.18.19.125:443
+  Packets: 21, Bytes: 4919, Flags: PA, A
+104.18.19.125:443 -> 172.16.17.193:55863
+  Packets: 14, Bytes: 1342, Flags: A, PA
+172.16.17.193:55950 -> 103.3.33.8:443
+  Packets: 2, Bytes: 108, Flags: FA, RA
+23.212.5.41:443 -> 172.16.17.193:56330
+  Packets: 3, Bytes: 231, Flags: PA, FA
+172.16.17.193:56330 -> 23.212.5.41:443
+  Packets: 1, Bytes: 54, Flags: A
+13.248.241.7:443 -> 172.16.17.193:56314
+  Packets: 5, Bytes: 351, Flags: PA, FA, R
+172.16.17.193:56314 -> 13.248.241.7:443
+  Packets: 3, Bytes: 201, Flags: A, PA, FA
+75.2.76.8:443 -> 172.16.17.193:56312
+  Packets: 4, Bytes: 297, Flags: PA, FA, R
+172.16.17.193:56312 -> 75.2.76.8:443
+  Packets: 3, Bytes: 201, Flags: A, PA, FA
+157.240.239.60:443 -> 172.16.17.193:56307
+  Packets: 3, Bytes: 231, Flags: PA, FA
+157.240.198.60:443 -> 172.16.17.193:56306
+  Packets: 3, Bytes: 231, Flags: PA, FA
+157.240.242.60:443 -> 172.16.17.193:56309
+  Packets: 3, Bytes: 231, Flags: PA, FA
+172.16.17.193:56307 -> 157.240.239.60:443
+  Packets: 2, Bytes: 108, Flags: A
+172.16.17.193:56306 -> 157.240.198.60:443
+  Packets: 2, Bytes: 108, Flags: A
+... and 8 more connections
+
+============================================================
+End of Report
+============================================================
