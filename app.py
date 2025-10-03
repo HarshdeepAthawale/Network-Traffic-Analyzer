@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask_cors import CORS
 import os
 import json
 from datetime import datetime
@@ -11,6 +12,7 @@ import ipaddress
 import hashlib
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for frontend communication
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['DATA_FOLDER'] = 'analysis_data'
@@ -370,4 +372,5 @@ def download_report(analysis_id):
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)

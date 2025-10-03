@@ -1,0 +1,13 @@
+{
+  "name": "network-traffic-analyzer-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Network Traffic Analyzer",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 3000",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "keywords": ["network", "traffic", "analyzer", "pcap"],
+  "author": "Your Name",
+  "license": "MIT"
+}
