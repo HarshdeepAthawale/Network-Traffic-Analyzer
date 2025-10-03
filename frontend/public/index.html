@@ -305,9 +305,9 @@
         <div class="upload-section">
             <div class="upload-area" id="uploadArea">
                 <div class="upload-icon">📁</div>
-                <div class="upload-text">Drop your PCAP file here or click to browse</div>
-                <div class="upload-subtext">Supports .pcap files only (Max 100MB)</div>
-                <input type="file" id="fileInput" class="file-input" accept=".pcap">
+                <div class="upload-text">Drop your PCAP/PCAPNG file here or click to browse</div>
+                <div class="upload-subtext">Supports .pcap and .pcapng files (Max 100MB)</div>
+                <input type="file" id="fileInput" class="file-input" accept=".pcap,.pcapng">
             </div>
             
             <button class="btn" id="browseBtn" onclick="document.getElementById('fileInput').click()">
@@ -464,8 +464,8 @@
         }
 
         function handleFile(file) {
-            if (!file.name.toLowerCase().endsWith('.pcap')) {
-                showError('Please select a valid .pcap file');
+            if (!file.name.toLowerCase().endsWith('.pcap') && !file.name.toLowerCase().endsWith('.pcapng')) {
+                showError('Please select a valid .pcap or .pcapng file');
                 return;
             }
 

@@ -1,10 +1,10 @@
 # Network Traffic Analyzer 🚀
 
-A comprehensive web-based network traffic analyzer that processes PCAP files from Wireshark and extracts detailed network information including hosts, IP addresses, MAC addresses, protocols, connections, and traffic statistics.
+A comprehensive web-based network traffic analyzer that processes PCAP and PCAPNG files from Wireshark and other packet capture tools, extracting detailed network information including hosts, IP addresses, MAC addresses, protocols, connections, and traffic statistics.
 
 ## ✨ Features
 
-- **📁 File Upload**: Drag and drop or browse to upload PCAP files (.pcap only)
+- **📁 File Upload**: Drag and drop or browse to upload PCAP/PCAPNG files (.pcap and .pcapng)
 - **🔍 Comprehensive Analysis**: Extracts detailed network information from PCAP files
 - **🌐 Host Information**: IP addresses, MAC addresses, and hostnames
 - **📡 Protocol Analysis**: Protocol distribution and statistics
@@ -48,9 +48,9 @@ A comprehensive web-based network traffic analyzer that processes PCAP files fro
 
 ## 📋 File Support
 
-- **✅ Supported formats**: .pcap files only
+- **✅ Supported formats**: .pcap and .pcapng files
 - **📏 Maximum file size**: 100MB
-- **🛠️ Source tools**: Wireshark, tcpdump, or any tool that generates PCAP files
+- **🛠️ Source tools**: Wireshark, tcpdump, or any tool that generates PCAP/PCAPNG files
 
 ## 📁 Project Structure
 

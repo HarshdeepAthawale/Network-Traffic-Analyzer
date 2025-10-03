@@ -226,8 +226,8 @@ def upload_file():
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
         
-        if not file.filename.lower().endswith('.pcap'):
-            return jsonify({'error': 'File must be a .pcap file'}), 400
+        if not file.filename.lower().endswith(('.pcap', '.pcapng')):
+            return jsonify({'error': 'File must be a .pcap or .pcapng file'}), 400
         
         # Save uploaded file
         filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{file.filename}"
