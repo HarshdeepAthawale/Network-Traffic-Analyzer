@@ -10,6 +10,9 @@ from scapy.layers.dns import DNS
 from scapy.layers.http import HTTP
 import ipaddress
 import hashlib
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
+import urllib.parse
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
@@ -17,9 +20,100 @@ app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['DATA_FOLDER'] = 'analysis_data'
 
-# Create necessary directories
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(app.config['DATA_FOLDER'], exist_ok=True)
+# MongoDB Configuration
+from config import MONGO_URI, MONGO_DATABASE, MONGO_COLLECTION
+
+# Initialize MongoDB connection
+try:
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+    db = client[MONGO_DATABASE]
+    collection = db[MONGO_COLLECTION]
+    # Test connection
+    client.admin.command('ping')
+    print(f"Connected to MongoDB: {MONGO_DATABASE}.{MONGO_COLLECTION}")
+    mongo_connected = True
+except ConnectionFailure:
+    print("Failed to connect to MongoDB. Falling back to local storage.")
+    mongo_connected = False
+    # Keep local storage as fallback
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['DATA_FOLDER'], exist_ok=True)
+
+def save_analysis_to_mongo(analysis_id, analysis_data, report_text):
+    """Save analysis data to MongoDB"""
+    if not mongo_connected:
+        return False
+    
+    try:
+        doc = {
+            '_id': analysis_id,
+            'analysis_data': analysis_data,
+            'report_text': report_text,
+            'created_at': datetime.now(),
+            'filename': analysis_data['summary'].get('filename', 'unknown'),
+            'total_packets': analysis_data['summary']['total_packets'],
+            'total_bytes': analysis_data['summary']['total_bytes']
+        }
+        
+        result = collection.replace_one(
+            {'_id': analysis_id}, 
+            doc, 
+            upsert=True
+        )
+        
+        print(f"Saved analysis {analysis_id} to MongoDB")
+        return True
+        
+    except Exception as e:
+        print(f"Error saving to MongoDB: {str(e)}")
+        return False
+
+def get_analysis_from_mongo(analysis_id):
+    """Get analysis data from MongoDB"""
+    if not mongo_connected:
+        return None
+    
+    try:
+        doc = collection.find_one({'_id': analysis_id})
+        if doc:
+            return doc['analysis_data']
+        return None
+        
+    except Exception as e:
+        print(f"Error retrieving from MongoDB: {str(e)}")
+        return None
+
+def get_report_from_mongo(analysis_id):
+    """Get report text from MongoDB"""
+    if not mongo_connected:
+        return None
+    
+    try:
+        doc = collection.find_one({'_id': analysis_id}, {'report_text': 1})
+        if doc:
+            return doc['report_text']
+        return None
+        
+    except Exception as e:
+        print(f"Error retrieving report from MongoDB: {str(e)}")
+        return None
+
+def list_analyses_from_mongo():
+    """List all analyses from MongoDB"""
+    if not mongo_connected:
+        return []
+    
+    try:
+        analyses = list(collection.find(
+            {}, 
+            {'_id': 1, 'created_at': 1, 'filename': 1, 'total_packets': 1, 'total_bytes': 1}
+        ).sort('created_at', -1))
+        
+        return analyses
+        
+    except Exception as e:
+        print(f"Error listing analyses from MongoDB: {str(e)}")
+        return []
 
 class NetworkAnalyzer:
     def __init__(self):
@@ -56,7 +150,7 @@ class NetworkAnalyzer:
             # Calculate final statistics
             self._calculate_statistics()
             
-            return self._get_analysis_results()
+            return self._get_analysis_results(os.path.basename(file_path))
             
         except Exception as e:
             raise Exception(f"Error analyzing PCAP file: {str(e)}")
@@ -193,7 +287,7 @@ class NetworkAnalyzer:
                     flags_list.append(str(flag))
             conn['flags'] = flags_list
     
-    def _get_analysis_results(self):
+    def _get_analysis_results(self, filename=None):
         """Get formatted analysis results"""
         return {
             'summary': {
@@ -203,7 +297,8 @@ class NetworkAnalyzer:
                 'unique_ips': len(self.hosts['ips']),
                 'unique_macs': len(self.hosts['macs']),
                 'unique_hostnames': len(self.hosts['hostnames']),
-                'unique_connections': len(self.connections)
+                'unique_connections': len(self.connections),
+                'filename': filename
             },
             'hosts': self.hosts,
             'protocols': self.protocols,
@@ -215,6 +310,11 @@ class NetworkAnalyzer:
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/dashboard')
+def dashboard():
+    """Dashboard view for managing all analyses"""
+    return render_template('dashboard.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -241,15 +341,22 @@ def upload_file():
         # Generate unique analysis ID
         analysis_id = hashlib.md5(filename.encode()).hexdigest()
         
-        # Save analysis results to local file (JSON for data)
-        results_file = os.path.join(app.config['DATA_FOLDER'], f"{analysis_id}.json")
-        with open(results_file, 'w') as f:
-            json.dump(analysis_results, f, indent=2, default=str)
-        
         # Generate human-readable text report
-        report_file = os.path.join(app.config['DATA_FOLDER'], f"{analysis_id}_report.txt")
-        with open(report_file, 'w') as f:
-            f.write(generate_text_report(analysis_results))
+        report_text = generate_text_report(analysis_results)
+        
+        # Try to save to MongoDB first
+        if save_analysis_to_mongo(analysis_id, analysis_results, report_text):
+            print(f"Successfully saved analysis {analysis_id} to MongoDB")
+        else:
+            # Fallback to local storage if MongoDB fails
+            print(f"Failed to save to MongoDB, using local storage for {analysis_id}")
+            results_file = os.path.join(app.config['DATA_FOLDER'], f"{analysis_id}.json")
+            with open(results_file, 'w') as f:
+                json.dump(analysis_results, f, indent=2, default=str)
+            
+            report_file = os.path.join(app.config['DATA_FOLDER'], f"{analysis_id}_report.txt")
+            with open(report_file, 'w') as f:
+                f.write(report_text)
         
         # Clean up uploaded file
         os.remove(file_path)
@@ -258,7 +365,8 @@ def upload_file():
             'success': True,
             'analysis_id': analysis_id,
             'results': analysis_results,
-            'report_file': f"{analysis_id}_report.txt"
+            'report_file': f"{analysis_id}_report.txt",
+            'storage': 'mongodb' if mongo_connected else 'local'
         })
         
     except Exception as e:
@@ -347,14 +455,20 @@ def generate_text_report(results):
 @app.route('/analysis/<analysis_id>')
 def get_analysis(analysis_id):
     try:
+        # Try to get from MongoDB first
+        if mongo_connected:
+            results = get_analysis_from_mongo(analysis_id)
+            if results:
+                return jsonify(results)
+        
+        # Fallback to local storage
         results_file = os.path.join(app.config['DATA_FOLDER'], f"{analysis_id}.json")
-        if not os.path.exists(results_file):
-            return jsonify({'error': 'Analysis not found'}), 404
+        if os.path.exists(results_file):
+            with open(results_file, 'r') as f:
+                results = json.load(f)
+            return jsonify(results)
         
-        with open(results_file, 'r') as f:
-            results = json.load(f)
-        
-        return jsonify(results)
+        return jsonify({'error': 'Analysis not found'}), 404
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -362,11 +476,83 @@ def get_analysis(analysis_id):
 @app.route('/report/<analysis_id>')
 def download_report(analysis_id):
     try:
-        report_file = os.path.join(app.config['DATA_FOLDER'], f"{analysis_id}_report.txt")
-        if not os.path.exists(report_file):
-            return jsonify({'error': 'Report not found'}), 404
+        # Try to get report from MongoDB first
+        if mongo_connected:
+            report_text = get_report_from_mongo(analysis_id)
+            if report_text:
+                # Create a temporary file-like response
+                response = jsonify({
+                    'success': True,
+                    'content': report_text,
+                    'filename': f"{analysis_id}_report.txt"
+                })
+                response.headers['Content-Disposition'] = f'attachment; filename="{analysis_id}_report.txt"'
+                response.headers['Content-Type'] = 'text/plain'
+                return response
         
-        return send_from_directory(app.config['DATA_FOLDER'], f"{analysis_id}_report.txt", as_attachment=True)
+        # Fallback to local storage
+        report_file = os.path.join(app.config['DATA_FOLDER'], f"{analysis_id}_report.txt")
+        if os.path.exists(report_file):
+            return send_from_directory(app.config['DATA_FOLDER'], f"{analysis_id}_report.txt", as_attachment=True)
+        
+        return jsonify({'error': 'Report not found'}), 404
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/analyses')
+def list_analyses():
+    """List all network analyses"""
+    try:
+        if mongo_connected:
+            analyses = list_analyses_from_mongo()
+            # Enhance analyses with additional data for dashboard
+            enhanced_analyses = []
+            for analysis in analyses:
+                enhanced = analysis.copy()
+                enhanced['storage'] = 'mongodb'
+                enhanced_analyses.append(enhanced)
+            
+            return jsonify({
+                'success': True,
+                'storage': 'mongodb',
+                'analyses': enhanced_analyses,
+                'total': len(enhanced_analyses)
+            })
+        
+        # Fallback: list local files
+        analysis_files = []
+        if os.path.exists(app.config['DATA_FOLDER']):
+            for filename in os.listdir(app.config['DATA_FOLDER']):
+                if filename.endswith('.json'):
+                    analysis_id = filename[:-5]  # Remove .json extension
+                    file_path = os.path.join(app.config['DATA_FOLDER'], filename)
+                    try:
+                        with open(file_path, 'r') as f:
+                            data = json.load(f)
+                        analysis_files.append({
+                            '_id': analysis_id,
+                            'filename': data['summary'].get('filename', 'unknown'),
+                            'total_packets': data['summary']['total_packets'],
+                            'total_bytes': data['summary']['total_bytes'],
+                            'created_at': data['analysis_timestamp']
+                        })
+                    except:
+                        continue
+        
+        # Enhance local analyses with additional data for dashboard
+        enhanced_files = []
+        for analysis in analysis_files:
+            enhanced = analysis.copy()
+            enhanced['storage'] = 'local'
+            enhanced_files.append(enhanced)
+        
+        return jsonify({
+            'success': True,
+            'storage': 'local',
+            'analyses': enhanced_files,
+            'total': len(enhanced_files)
+        })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

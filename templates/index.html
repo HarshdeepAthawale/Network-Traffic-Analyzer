@@ -294,8 +294,28 @@
             }
         }
     </style>
+    <style>
+        .dashboard-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .dashboard-link:hover {
+            background: #0056b3;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
+    <a href="/dashboard" class="dashboard-link">📊 View My Data</a>
     <div class="container">
         <div class="header">
             <h1>Network Traffic Analyzer</h1>

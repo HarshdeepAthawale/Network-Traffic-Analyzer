@@ -1,6 +1,6 @@
 # Network Traffic Analyzer 🚀
 
-A comprehensive web-based network traffic analyzer that processes PCAP and PCAPNG files from Wireshark and other packet capture tools, extracting detailed network information including hosts, IP addresses, MAC addresses, protocols, connections, and traffic statistics.
+A comprehensive web-based network traffic analyzer with MongoDB integration that processes PCAP and PCAPNG files from Wireshark and other packet capture tools, extracting detailed network information including hosts, IP addresses, MAC addresses, protocols, connections, and traffic statistics.
 
 ## ✨ Features
 
@@ -33,6 +33,8 @@ A comprehensive web-based network traffic analyzer that processes PCAP and PCAPN
 - Hosts with highest traffic volume ranked by bytes
 
 ## 🚀 Quick Start
+
+### Option 1: Local Storage
 
 1. **Install dependencies**
    ```bash
