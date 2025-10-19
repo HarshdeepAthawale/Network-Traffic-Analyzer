@@ -1,0 +1,20 @@
+# Python backend files
+backend/
+*.py
+*.pyc
+__pycache__/
+*.log
+
+# Python virtual environment
+venv/
+env/
+.Python
+
+# Deployment files
+render.yaml
+DEPLOYMENT.md
+
+# Local files
+.env.local
+.env*.local
+

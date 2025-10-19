@@ -1,0 +1,25 @@
+services:
+  # Backend API Service
+  - type: web
+    name: network-traffic-analyzer-backend
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: NTA_DEBUG
+        value: false
+      - key: NTA_HOST
+        value: 0.0.0.0
+      - key: NTA_PORT
+        fromGroup: PORT
+      - key: NTA_STORAGE_TYPE
+        value: memory
+      - key: NTA_CORS_ORIGINS
+        value: "*"
+      - key: PYTHON_VERSION
+        value: 3.11.9
+    healthCheckPath: /
+    autoDeploy: true
+

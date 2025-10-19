@@ -1,0 +1,31 @@
+# Node.js / Frontend files (not needed for Python backend)
+node_modules/
+.next/
+out/
+build/
+
+# Frontend specific files
+*.tsx
+*.ts
+*.jsx
+*.js
+!backend/**/*.py
+
+# Config files not needed
+tsconfig.json
+next.config.mjs
+postcss.config.mjs
+components.json
+tailwind.config.js
+
+# Keep only backend
+app/
+components/
+hooks/
+lib/
+public/
+styles/
+
+# Documentation
+DEPLOYMENT.md
+

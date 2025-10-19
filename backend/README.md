@@ -1,0 +1,104 @@
+# Network Traffic Analyzer Backend
+
+FastAPI backend for analyzing PCAP network capture files.
+
+## Features
+
+- Upload and parse PCAP/PCAPNG files
+- Protocol distribution analysis
+- Packet statistics and metrics
+- IP-MAC address mapping with vendor lookup
+- DNS hostname resolution
+- Paginated packet browsing with filtering
+- RESTful API with CORS support
+
+## Installation
+
+1. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+## Running the Backend
+
+### Development mode:
+```bash
+python main.py
+```
+
+Or with uvicorn directly:
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Production mode:
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+## API Endpoints
+
+- `POST /api/upload` - Upload PCAP file for analysis
+- `GET /api/summary` - Get summary statistics
+- `GET /api/packets` - Get paginated packet list with filtering
+- `GET /api/ip-mac-map` - Get IP-MAC mappings with statistics
+
+## API Documentation
+
+Once running, visit:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+## Environment Variables
+
+- `NTA_HOST` - Host to bind to (default: 0.0.0.0)
+- `NTA_PORT` - Port to bind to (default: 8000)
+- `NTA_DEBUG` - Debug mode (default: True)
+- `NTA_MAX_UPLOAD_SIZE` - Max upload file size in bytes (default: 100MB)
+
+## Frontend Integration
+
+The backend is configured to accept requests from any origin (CORS enabled).
+For production, update the CORS settings in `main.py` to specify allowed origins.
+
+## Directory Structure
+
+```
+backend/
+├── app/
+│   ├── api/           # API endpoint routes
+│   ├── core/          # Core configuration and utilities
+│   ├── models/        # Pydantic data models
+│   └── services/      # Business logic services
+├── logs/              # Application logs
+├── main.py            # FastAPI application entry point
+├── requirements.txt   # Python dependencies
+└── README.md          # This file
+```
+
+## Testing with Sample PCAP
+
+You can test the backend using sample PCAP files from:
+- https://wiki.wireshark.org/SampleCaptures
+- https://www.netresec.com/index.ashx?page=PcapFiles
+
+## Troubleshooting
+
+1. **Import errors**: Make sure you're in the virtual environment and all dependencies are installed
+2. **Permission errors**: Some features like raw packet capture require elevated privileges
+3. **Memory issues**: Large PCAP files may consume significant memory. Consider chunking for production use
+
+## Future Enhancements
+
+- Database persistence (SQLite/PostgreSQL)
+- Real-time packet capture mode
+- WebSocket support for live updates
+- Export functionality (CSV, JSON)
+- Advanced filtering and search
+- Performance optimizations for large files
