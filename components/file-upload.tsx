@@ -41,14 +41,6 @@ export function FileUpload({ onAnalyzed, className }: Props) {
       const result = await uploadFile(file)
       
       if (result.success) {
-        // Store file info
-        localStorage.setItem("nta:lastFile", JSON.stringify({ 
-          name: file.name, 
-          size: file.size, 
-          uploadedAt: Date.now(),
-          fileId: result.fileId 
-        }))
-        
         // Show upload success
         setProgress(100)
         

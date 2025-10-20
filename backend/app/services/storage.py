@@ -23,7 +23,10 @@ class InMemoryStorage:
         self.current_file_id: Optional[str] = None
     
     def store_file(self, filename: str, packets: List[Packet], stats: Dict) -> str:
-        """Store parsed file data"""
+        """Store parsed file data - clears previous data to prevent history"""
+        # Clear all previous data to prevent showing history
+        self.clear()
+        
         file_id = str(uuid.uuid4())
         
         # Store metadata
@@ -42,7 +45,7 @@ class InMemoryStorage:
         # Set as current file
         self.current_file_id = file_id
         
-        logger.info(f"Stored file {filename} with ID {file_id}, {len(packets)} packets")
+        logger.info(f"Stored file {filename} with ID {file_id}, {len(packets)} packets (cleared previous data)")
         return file_id
     
     def get_packets(self, file_id: Optional[str] = None) -> List[Packet]:

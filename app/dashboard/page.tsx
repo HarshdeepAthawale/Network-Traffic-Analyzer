@@ -25,21 +25,15 @@ export default function DashboardPage() {
     revalidateOnFocus: false,
   })
 
-  const lastFile =
-    typeof window !== "undefined"
-      ? (JSON.parse(localStorage.getItem("nta:lastFile") || "null") as {
-          name: string
-          size: number
-          uploadedAt: number
-        } | null)
-      : null
+  // No file history - always show current state
+  const lastFile = null
 
   return (
     <div className="min-h-dvh">
       <main className="bg-network/30">
         <Navbar
-          fileName={lastFile?.name || "No file uploaded"}
-          sizeBytes={lastFile?.size || 0}
+          fileName="No file uploaded"
+          sizeBytes={0}
         />
         <div className="mx-auto max-w-[1400px] gap-6 p-4 md:p-6">
           {error ? (

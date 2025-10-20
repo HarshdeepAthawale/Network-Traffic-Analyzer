@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { FileUpload } from "@/components/file-upload"
-import { Button } from "@/components/ui/button"
 
 export default function UploadPage() {
   const router = useRouter()
@@ -28,17 +27,6 @@ export default function UploadPage() {
           className="rounded-xl border bg-card/60 p-6 backdrop-blur"
         />
 
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <Button
-            variant="default"
-            onClick={() => router.push("/dashboard")}
-            className="bg-brand text-background hover:bg-brand/90"
-            aria-label="Go to dashboard"
-            title="Go to dashboard"
-          >
-            Go to Dashboard
-          </Button>
-        </div>
       </section>
     </main>
   )
