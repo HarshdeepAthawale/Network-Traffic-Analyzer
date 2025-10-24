@@ -23,6 +23,8 @@ export default function DashboardPage() {
     mutate,
   } = useSWR("/api/summary", fetchJSON, {
     revalidateOnFocus: false,
+    refreshInterval: 0,
+    dedupingInterval: 0,
   })
 
   // Get file info from summary data

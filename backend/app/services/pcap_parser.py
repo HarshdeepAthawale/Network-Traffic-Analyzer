@@ -200,19 +200,80 @@ class PCAPParser:
         return layers
     
     def _get_protocol(self, pkt: ScapyPacket) -> str:
-        """Determine packet protocol"""
+        """Determine packet protocol - simplified for top 10 protocols"""
+        # Check for specific application layer protocols first
         if DNS in pkt:
             return "DNS"
-        elif HTTP in pkt:
+        elif HTTP in pkt or HTTPRequest in pkt or HTTPResponse in pkt:
             return "HTTP"
-        elif TCP in pkt:
-            if pkt[TCP].dport == 443 or pkt[TCP].sport == 443:
+        
+        # Check transport layer and common ports
+        if TCP in pkt:
+            sport = pkt[TCP].sport
+            dport = pkt[TCP].dport
+            
+            # Top 10 TCP protocols
+            if sport == 443 or dport == 443:
                 return "HTTPS"
-            elif pkt[TCP].dport == 22 or pkt[TCP].sport == 22:
+            elif sport == 22 or dport == 22:
                 return "SSH"
-            return "TCP"
+            elif sport == 21 or dport == 21:
+                return "FTP"
+            elif sport == 23 or dport == 23:
+                return "Telnet"
+            elif sport == 25 or dport == 25:
+                return "SMTP"
+            elif sport == 53 or dport == 53:
+                return "DNS"
+            elif sport == 80 or dport == 80:
+                return "HTTP"
+            elif sport == 110 or dport == 110:
+                return "POP3"
+            elif sport == 143 or dport == 143:
+                return "IMAP"
+            elif sport == 993 or dport == 993:
+                return "IMAPS"
+            elif sport == 995 or dport == 995:
+                return "POP3S"
+            elif sport == 3389 or dport == 3389:
+                return "RDP"
+            elif sport == 5900 or dport == 5900:
+                return "VNC"
+            elif sport == 8080 or dport == 8080:
+                return "HTTP-Alt"
+            elif sport == 8443 or dport == 8443:
+                return "HTTPS-Alt"
+            else:
+                return "TCP"
+        
         elif UDP in pkt:
-            return "UDP"
+            sport = pkt[UDP].sport
+            dport = pkt[UDP].dport
+            
+            # Top 10 UDP protocols
+            if sport == 53 or dport == 53:
+                return "DNS"
+            elif sport == 67 or dport == 67 or sport == 68 or dport == 68:
+                return "DHCP"
+            elif sport == 69 or dport == 69:
+                return "TFTP"
+            elif sport == 123 or dport == 123:
+                return "NTP"
+            elif sport == 161 or dport == 161:
+                return "SNMP"
+            elif sport == 162 or dport == 162:
+                return "SNMP-Trap"
+            elif sport == 500 or dport == 500:
+                return "IKE"
+            elif sport == 4500 or dport == 4500:
+                return "IPSec-NAT"
+            elif sport == 5353 or dport == 5353:
+                return "mDNS"
+            elif sport == 443 or dport == 443:
+                return "QUIC"
+            else:
+                return "UDP"
+        
         elif ICMP in pkt:
             return "ICMP"
         elif ARP in pkt:

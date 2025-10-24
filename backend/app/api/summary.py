@@ -83,6 +83,9 @@ def _calculate_protocol_distribution(protocols: Counter) -> List[ProtocolDistrib
     if total == 0:
         return []
     
+    # Log protocol distribution for debugging
+    logger.info(f"Protocol distribution: {dict(protocols.most_common(10))}")
+    
     distribution = []
     for protocol, count in protocols.most_common():
         pct = round((count / total) * 100, 1)
@@ -100,44 +103,43 @@ def _calculate_pps(packets: List, stats: Dict) -> List[PacketsPerSecond]:
     if not packets or stats.get('duration', 0) == 0:
         return []
     
-    # Group packets by second
-    start_time = stats.get('start_time')
-    if not start_time:
-        return []
+    # Group packets by actual timestamps (not artificial buckets)
+    time_groups = {}
     
-    # Create time buckets with higher precision (every 5 seconds for better visualization)
-    duration = int(stats.get('duration', 0)) + 1
-    bucket_size = max(1, duration // 20)  # Create about 20 data points
-    buckets = {}
-    
-    # Fill buckets
+    # Fill time groups with actual packet timestamps
     for packet in packets:
         try:
             packet_time = datetime.strptime(packet.ts, "%Y-%m-%d %H:%M:%S.%f")
-            elapsed = (packet_time - start_time).total_seconds()
-            bucket = int(elapsed // bucket_size) * bucket_size
+            # Round to nearest second for grouping
+            time_key = packet_time.replace(microsecond=0)
             
-            if bucket not in buckets:
-                buckets[bucket] = {'packets': 0, 'bytes': 0}
-            buckets[bucket]['packets'] += 1
-            buckets[bucket]['bytes'] += packet.size
+            if time_key not in time_groups:
+                time_groups[time_key] = {'packets': 0, 'bytes': 0}
+            time_groups[time_key]['packets'] += 1
+            time_groups[time_key]['bytes'] += packet.size
         except Exception as e:
             logger.warning(f"Error processing packet timestamp: {e}")
+            logger.warning(f"Packet timestamp format: {packet.ts}")
     
     # Create PPS data points with actual timestamps
     pps_data = []
-    for bucket_time in sorted(buckets.keys()):
-        actual_time = start_time + timedelta(seconds=bucket_time)
-        # Show more detailed timestamp if duration is short, otherwise just time
+    for time_key in sorted(time_groups.keys()):
+        # Format timestamp based on duration
+        duration = stats.get('duration', 0)
         if duration < 3600:  # Less than 1 hour
-            time_str = actual_time.strftime("%H:%M:%S")
+            time_str = time_key.strftime("%H:%M:%S")
         else:  # More than 1 hour, show date and time
-            time_str = actual_time.strftime("%m/%d %H:%M:%S")
+            time_str = time_key.strftime("%m/%d %H:%M:%S")
+        
         pps_data.append(PacketsPerSecond(
             t=time_str,
-            pps=buckets[bucket_time]['packets'],
-            bps=buckets[bucket_time]['bytes']
+            pps=time_groups[time_key]['packets'],
+            bps=time_groups[time_key]['bytes']
         ))
+    
+    # Log first few timestamps for debugging
+    if pps_data:
+        logger.info(f"PPS timestamps: {[p.t for p in pps_data[:5]]}")
     
     return pps_data
 
