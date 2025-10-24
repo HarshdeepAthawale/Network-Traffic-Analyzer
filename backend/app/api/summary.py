@@ -121,15 +121,11 @@ def _calculate_pps(packets: List, stats: Dict) -> List[PacketsPerSecond]:
             logger.warning(f"Error processing packet timestamp: {e}")
             logger.warning(f"Packet timestamp format: {packet.ts}")
     
-    # Create PPS data points with actual timestamps
+    # Create PPS data points with actual PCAP timestamps
     pps_data = []
     for time_key in sorted(time_groups.keys()):
-        # Format timestamp based on duration
-        duration = stats.get('duration', 0)
-        if duration < 3600:  # Less than 1 hour
-            time_str = time_key.strftime("%H:%M:%S")
-        else:  # More than 1 hour, show date and time
-            time_str = time_key.strftime("%m/%d %H:%M:%S")
+        # Format as actual timestamp from PCAP file
+        time_str = time_key.strftime("%H:%M:%S")
         
         pps_data.append(PacketsPerSecond(
             t=time_str,
@@ -139,7 +135,7 @@ def _calculate_pps(packets: List, stats: Dict) -> List[PacketsPerSecond]:
     
     # Log first few timestamps for debugging
     if pps_data:
-        logger.info(f"PPS timestamps: {[p.t for p in pps_data[:5]]}")
+        logger.info(f"PPS actual timestamps: {[p.t for p in pps_data[:5]]}")
     
     return pps_data
 
