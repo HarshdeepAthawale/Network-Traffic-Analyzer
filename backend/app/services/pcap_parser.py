@@ -3,7 +3,7 @@ PCAP file parser service using Scapy
 """
 import logging
 from typing import List, Dict, Any, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict, Counter
 import hashlib
 import io
@@ -67,8 +67,9 @@ class PCAPParser:
     def _process_packet(self, pkt: ScapyPacket, idx: int):
         """Process a single packet"""
         try:
-            # Extract basic info
-            packet_time = datetime.fromtimestamp(float(pkt.time))
+            # Extract basic info - Convert to Indian Standard Time (IST = UTC+5:30)
+            ist_timezone = timezone(timedelta(hours=5, minutes=30))
+            packet_time = datetime.fromtimestamp(float(pkt.time), tz=ist_timezone)
             packet_size = len(pkt)
             
             # Update stats

@@ -3,7 +3,7 @@ Storage service for parsed PCAP data
 """
 import logging
 from typing import Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import uuid
 from collections import defaultdict
 
@@ -33,7 +33,7 @@ class InMemoryStorage:
         self.files[file_id] = {
             'id': file_id,
             'filename': filename,
-            'upload_time': datetime.now(),
+            'upload_time': datetime.now(timezone(timedelta(hours=5, minutes=30))),
             'packet_count': len(packets),
             'total_bytes': stats.get('total_bytes', 0)
         }

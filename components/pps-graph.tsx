@@ -25,7 +25,11 @@ export function PpsGraph({ data, loading }: { data: Point[]; loading?: boolean }
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="hsl(0 0% 50% / 0.15)" />
-              <XAxis dataKey="t" tick={{ fontSize: 12 }} />
+              <XAxis 
+                dataKey="t" 
+                tick={{ fontSize: 12 }} 
+                interval="preserveStartEnd"
+              />
               <YAxis tick={{ fontSize: 12 }} />
               <Tooltip />
               <Area type="monotone" dataKey="pps" stroke="var(--color-brand)" fill="url(#g1)" />
