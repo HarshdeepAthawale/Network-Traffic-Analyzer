@@ -105,30 +105,38 @@ def _calculate_pps(packets: List, stats: Dict) -> List[PacketsPerSecond]:
     if not start_time:
         return []
     
-    # Create time buckets
+    # Create time buckets with higher precision (every 5 seconds for better visualization)
     duration = int(stats.get('duration', 0)) + 1
-    buckets = {i: {'packets': 0, 'bytes': 0} for i in range(duration)}
+    bucket_size = max(1, duration // 20)  # Create about 20 data points
+    buckets = {}
     
     # Fill buckets
     for packet in packets:
         try:
             packet_time = datetime.strptime(packet.ts, "%Y-%m-%d %H:%M:%S.%f")
             elapsed = (packet_time - start_time).total_seconds()
-            bucket = int(elapsed)
-            if 0 <= bucket < duration:
-                buckets[bucket]['packets'] += 1
-                buckets[bucket]['bytes'] += packet.size
+            bucket = int(elapsed // bucket_size) * bucket_size
+            
+            if bucket not in buckets:
+                buckets[bucket] = {'packets': 0, 'bytes': 0}
+            buckets[bucket]['packets'] += 1
+            buckets[bucket]['bytes'] += packet.size
         except Exception as e:
             logger.warning(f"Error processing packet timestamp: {e}")
     
-    # Create PPS data points
+    # Create PPS data points with actual timestamps
     pps_data = []
-    for i in range(min(60, duration)):  # Limit to 60 seconds for display
-        time_str = (start_time + timedelta(seconds=i)).strftime("%H:%M:%S")
+    for bucket_time in sorted(buckets.keys()):
+        actual_time = start_time + timedelta(seconds=bucket_time)
+        # Show more detailed timestamp if duration is short, otherwise just time
+        if duration < 3600:  # Less than 1 hour
+            time_str = actual_time.strftime("%H:%M:%S")
+        else:  # More than 1 hour, show date and time
+            time_str = actual_time.strftime("%m/%d %H:%M:%S")
         pps_data.append(PacketsPerSecond(
             t=time_str,
-            pps=buckets[i]['packets'],
-            bps=buckets[i]['bytes']
+            pps=buckets[bucket_time]['packets'],
+            bps=buckets[bucket_time]['bytes']
         ))
     
     return pps_data

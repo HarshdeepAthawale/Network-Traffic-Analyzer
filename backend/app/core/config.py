@@ -29,9 +29,10 @@ class Settings(BaseSettings):
     MAX_PACKETS_PER_PAGE: int = 100
     DEFAULT_PACKETS_PER_PAGE: int = 25
     
-    class Config:
-        env_prefix = "NTA_"
-        case_sensitive = False
+    model_config = {
+        "env_prefix": "NTA_",
+        "case_sensitive": False
+    }
 
 
 @lru_cache()

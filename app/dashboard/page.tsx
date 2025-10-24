@@ -25,15 +25,21 @@ export default function DashboardPage() {
     revalidateOnFocus: false,
   })
 
-  // No file history - always show current state
-  const lastFile = null
+  // Get file info from summary data
+  const fileInfo = summary?.overview ? {
+    fileName: "Network Capture",
+    sizeBytes: summary.overview.totalBytes
+  } : {
+    fileName: "No file uploaded",
+    sizeBytes: 0
+  }
 
   return (
     <div className="min-h-dvh">
       <main className="bg-network/30">
         <Navbar
-          fileName="No file uploaded"
-          sizeBytes={0}
+          fileName={fileInfo.fileName}
+          sizeBytes={fileInfo.sizeBytes}
         />
         <div className="mx-auto max-w-[1400px] gap-6 p-4 md:p-6">
           {error ? (

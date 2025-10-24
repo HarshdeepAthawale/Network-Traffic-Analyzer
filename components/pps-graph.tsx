@@ -3,35 +3,14 @@
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Card } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
 
 type Point = { t: string; pps: number; bps: number }
 
 export function PpsGraph({ data, loading }: { data: Point[]; loading?: boolean }) {
-  const [live, setLive] = React.useState(false)
-
-  React.useEffect(() => {
-    let id: any
-    if (live) {
-      id = setInterval(() => {
-        // noop: SWR revalidation could be triggered here if needed
-      }, 2000)
-    }
-    return () => clearInterval(id)
-  }, [live])
-
   return (
     <Card className="p-4">
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-3">
         <h3 className="text-sm font-medium">Packets per Second</h3>
-        <div className="flex items-center gap-2 text-xs">
-          <span
-            className={`inline-block h-2 w-2 rounded-full ${live ? "bg-brand animate-pulse" : "bg-muted-foreground/40"}`}
-            aria-hidden
-          />
-          Live
-          <Switch checked={live} onCheckedChange={setLive} aria-label="Toggle live mode" />
-        </div>
       </div>
       <div className="h-64">
         {loading ? (

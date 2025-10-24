@@ -13,9 +13,9 @@ export function Navbar({ fileName, sizeBytes }: Props) {
     <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-4 py-3 md:px-6">
         <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold">{fileName}</h2>
+          <h2 className="truncate text-lg font-semibold">Network Traffic Analyzer</h2>
           <p className="truncate text-sm text-muted-foreground">
-            Size {(sizeBytes / 1024 / 1024).toFixed(2)} MB • Network capture analysis
+            Size {(sizeBytes / 1024 / 1024).toFixed(2)} MB
           </p>
         </div>
         <div className="flex items-center gap-2">
