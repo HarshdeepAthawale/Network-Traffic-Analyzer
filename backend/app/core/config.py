@@ -12,10 +12,10 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     DEBUG: bool = True
-    CORS_ORIGINS: str = "*"  # Comma-separated list of allowed origins
+    CORS_ORIGINS: str = "*"  # Comma-separated list of allowed origins (use * for all or specific domains)
     
     # Upload Settings
-    MAX_UPLOAD_SIZE: int = 100 * 1024 * 1024  # 100MB
+    MAX_UPLOAD_SIZE: int = 500 * 1024 * 1024  # 500MB
     UPLOAD_CHUNK_SIZE: int = 1024 * 1024  # 1MB
     
     # Storage Settings
