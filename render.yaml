@@ -29,6 +29,8 @@ services:
         sync: false  # Will be set in dashboard
       - key: NTA_MONGODB_DATABASE
         value: network_traffic_analyzer
+      # Note: NTA_MONGODB_URI should be set in Render dashboard with URL-encoded password
+      # Example: mongodb+srv://user:%40Password@cluster.mongodb.net/database
       - key: NTA_MAX_UPLOAD_SIZE
         value: 524288000  # 500MB
     healthCheckPath: /

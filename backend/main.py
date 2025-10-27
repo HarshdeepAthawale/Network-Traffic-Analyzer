@@ -48,8 +48,8 @@ async def lifespan(app: FastAPI):
         logger.info("MongoDB initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize MongoDB: {e}")
-        # MongoDB is not critical for file storage (we use Cloudinary for that)
-        # But it's required for metadata storage
+        logger.warning("App will continue without MongoDB. File upload/parsing will work, but metadata storage may be limited.")
+        # Don't raise - allow app to start without MongoDB
     
     yield
     

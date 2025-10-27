@@ -25,21 +25,14 @@ class MongoDBService:
             connection_options = {
                 "maxPoolSize": 50,
                 "minPoolSize": 10,
-                "serverSelectionTimeoutMS": 5000,
+                "serverSelectionTimeoutMS": 10000,  # Increased timeout
                 "socketTimeoutMS": 30000,
                 "connectTimeoutMS": 20000,
+                "retryWrites": True,
             }
             
-            # Add SSL options for Atlas connections
-            if "mongodb+srv://" in settings.MONGODB_URI or "ssl=true" in settings.MONGODB_URI:
-                # For cloud platforms like Render.com, allow invalid certificates
-                # as a workaround for SSL handshake issues
-                connection_options.update({
-                    "tls": True,
-                    "tlsAllowInvalidCertificates": True,  # Required for some cloud platforms
-                    "retryWrites": True,
-                    "w": "majority",
-                })
+            # For mongodb+srv, let Motor handle SSL automatically
+            # Don't add tls parameters as they conflict with SRV DNS records
             
             self.client = AsyncIOMotorClient(
                 settings.MONGODB_URI,
