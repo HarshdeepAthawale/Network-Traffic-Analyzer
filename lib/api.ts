@@ -32,10 +32,17 @@ export async function uploadFile(file: File): Promise<{ success: boolean; fileId
     const formData = new FormData()
     formData.append('file', file)
     
+    // Create an AbortController for timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+    
     const res = await fetch(`${API_BASE_URL}/api/upload`, {
       method: 'POST',
       body: formData,
+      signal: controller.signal,
     })
+    
+    clearTimeout(timeoutId)
     
     if (!res.ok) {
       const error = await res.text()
@@ -46,6 +53,9 @@ export async function uploadFile(file: File): Promise<{ success: boolean; fileId
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Failed to connect to server. Please check if the backend is running.')
+    }
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Upload timed out. The file may be too large or the server may be unresponsive.')
     }
     throw error
   }

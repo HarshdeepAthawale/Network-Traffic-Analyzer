@@ -33,6 +33,7 @@ export function FileUpload({ onAnalyzed, className }: Props) {
     try {
       setUploading(true)
       setProgress(0)
+      setError(null)
       
       // Show initial progress
       setProgress(20)
@@ -46,13 +47,18 @@ export function FileUpload({ onAnalyzed, className }: Props) {
         
         // Navigate to dashboard after delay
         if (onAnalyzed) {
-          setTimeout(onAnalyzed, 400)
+          setTimeout(() => {
+            onAnalyzed()
+            setUploading(false)
+          }, 400)
+        } else {
+          setUploading(false)
         }
       }
     } catch (err) {
+      console.error('Upload error:', err)
       setError(err instanceof Error ? err.message : 'Upload failed')
       setProgress(0)
-    } finally {
       setUploading(false)
     }
   }

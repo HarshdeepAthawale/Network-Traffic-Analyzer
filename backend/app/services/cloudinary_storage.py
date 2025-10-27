@@ -23,6 +23,7 @@ class CloudinaryStorage:
     def __init__(self):
         self.is_initialized = False
         self._cache = {}  # In-memory cache for parsed data
+        self._current_file_id = None
         
     def _initialize(self):
         """Initialize Cloudinary connection"""
@@ -125,6 +126,9 @@ class CloudinaryStorage:
                 'stats': stats_data
             }
             
+            # Set as current file
+            self._current_file_id = file_id
+            
             logger.info(f"Stored file {filename} with ID {file_id}, {len(packets)} packets")
             return file_id
             
@@ -134,7 +138,12 @@ class CloudinaryStorage:
     
     async def get_packets(self, file_id: Optional[str] = None, skip: int = 0, limit: int = 1000) -> List[Packet]:
         """Get packets for a file"""
+        # If no file_id provided, use current file
         if not file_id:
+            file_id = self._current_file_id
+        
+        if not file_id:
+            logger.warning("No file_id provided and no current file")
             return []
         
         try:
@@ -178,7 +187,12 @@ class CloudinaryStorage:
     
     async def get_stats(self, file_id: Optional[str] = None) -> Dict:
         """Get statistics for a file"""
+        # If no file_id provided, use current file
         if not file_id:
+            file_id = self._current_file_id
+        
+        if not file_id:
+            logger.warning("No file_id provided and no current file")
             return {}
         
         try:
@@ -215,7 +229,12 @@ class CloudinaryStorage:
     
     async def get_file_info(self, file_id: Optional[str] = None) -> Optional[Dict]:
         """Get file metadata"""
+        # If no file_id provided, use current file
         if not file_id:
+            file_id = self._current_file_id
+        
+        if not file_id:
+            logger.warning("No file_id provided and no current file")
             return None
         
         try:
