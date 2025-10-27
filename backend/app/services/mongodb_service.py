@@ -37,7 +37,6 @@ class MongoDBService:
                 connection_options.update({
                     "tls": True,
                     "tlsAllowInvalidCertificates": True,  # Required for some cloud platforms
-                    "tlsInsecure": True,  # Required for Render.com compatibility
                     "retryWrites": True,
                     "w": "majority",
                 })
