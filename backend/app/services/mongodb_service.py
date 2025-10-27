@@ -21,12 +21,36 @@ class MongoDBService:
     async def connect(self):
         """Connect to MongoDB"""
         try:
-            self.client = AsyncIOMotorClient(settings.MONGODB_URI)
+            # Build connection options
+            connection_options = {
+                "maxPoolSize": 50,
+                "minPoolSize": 10,
+                "serverSelectionTimeoutMS": 5000,
+                "socketTimeoutMS": 30000,
+                "connectTimeoutMS": 20000,
+            }
+            
+            # Add SSL options for Atlas connections
+            if "mongodb+srv://" in settings.MONGODB_URI or "ssl=true" in settings.MONGODB_URI:
+                # For cloud platforms like Render.com, allow invalid certificates
+                # as a workaround for SSL handshake issues
+                connection_options.update({
+                    "tls": True,
+                    "tlsAllowInvalidCertificates": True,  # Required for some cloud platforms
+                    "tlsInsecure": True,  # Required for Render.com compatibility
+                    "retryWrites": True,
+                    "w": "majority",
+                })
+            
+            self.client = AsyncIOMotorClient(
+                settings.MONGODB_URI,
+                **connection_options
+            )
             self.db = self.client[settings.MONGODB_DATABASE]
             
             # Test connection
             await self.client.admin.command('ping')
-            logger.info(f"Connected to MongoDB: {settings.MONGODB_URI}")
+            logger.info(f"Connected to MongoDB successfully")
             
         except Exception as e:
             logger.error(f"Failed to connect to MongoDB: {e}")
