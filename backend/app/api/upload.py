@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 from app.models.packet import UploadResponse
 from app.services.pcap_parser import PCAPParser
 from app.services.storage import storage
+from app.services.pcap_file_storage import pcap_file_storage
+from app.services.mongodb_service import mongodb_service
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -52,7 +54,17 @@ async def upload_pcap(file: UploadFile = File(...)):
         
         logger.info(f"Uploading file: {file.filename}, size: {file_size} bytes")
         
-        # Parse the PCAP file
+        # Step 1: Upload raw .pcap file to Cloudinary and store metadata in MongoDB
+        file_metadata = await pcap_file_storage.upload_pcap_file(
+            file_content=file_content,
+            filename=file.filename,
+            user="web_upload"  # You can get this from request later
+        )
+        
+        file_id = file_metadata["file_id"]
+        logger.info(f"Uploaded file to Cloudinary with ID: {file_id}")
+        
+        # Step 2: Parse the PCAP file
         parser = PCAPParser()
         packets, stats = await parser.parse_file(file_content)
         
@@ -62,13 +74,21 @@ async def upload_pcap(file: UploadFile = File(...)):
                 detail="No packets found in the file"
             )
         
-        # Store the parsed data
-        file_id = await storage.store_file(file.filename, packets, stats)
+        # Step 3: Store the parsed data (packets + stats) in Cloudinary
+        parsed_file_id = await storage.store_file(file.filename, packets, stats)
+        logger.info(f"Stored parsed data with ID: {parsed_file_id}")
+        
+        # Step 4: Update MongoDB metadata with parsed data status
+        await mongodb_service.update_parsed_data_status(
+            file_id=file_id,
+            packet_count=len(packets),
+            stats=stats
+        )
         
         return UploadResponse(
             success=True,
             fileId=file_id,
-            message=f"Successfully parsed {len(packets)} packets from {file.filename}"
+            message=f"Successfully uploaded and parsed {len(packets)} packets from {file.filename}"
         )
         
     except HTTPException:

@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     CLOUDINARY_API_SECRET: str = ""
     CLOUDINARY_URL: Optional[str] = None  # Alternative: cloudinary://api_key:api_secret@cloud_name
     
+    # MongoDB Settings
+    MONGODB_URI: str = "mongodb://localhost:27017/"
+    MONGODB_DATABASE: str = "network_analyzer"
+    
     # Cache Settings
     CACHE_TTL: int = 300  # 5 minutes
     

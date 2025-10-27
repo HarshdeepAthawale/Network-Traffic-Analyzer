@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 
-from app.api import upload, summary, packets, ip_mac_map
+from app.api import upload, summary, packets, ip_mac_map, files
 from app.core.config import settings
 from app.core.logging import setup_logging
 
@@ -41,7 +41,25 @@ async def lifespan(app: FastAPI):
         logger.error("Cloudinary credentials not provided. Please configure Cloudinary in your environment variables.")
         raise RuntimeError("Cloudinary credentials are required. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.")
     
+    # Initialize MongoDB connection
+    try:
+        from app.services.mongodb_service import mongodb_service
+        await mongodb_service.connect()
+        logger.info("MongoDB initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize MongoDB: {e}")
+        # MongoDB is not critical for file storage (we use Cloudinary for that)
+        # But it's required for metadata storage
+    
     yield
+    
+    # Close MongoDB connection on shutdown
+    try:
+        from app.services.mongodb_service import mongodb_service
+        await mongodb_service.disconnect()
+        logger.info("MongoDB disconnected")
+    except Exception as e:
+        logger.error(f"Error disconnecting from MongoDB: {e}")
     
     # Close Cloudinary connection on shutdown
     try:
@@ -77,6 +95,7 @@ app.include_router(upload.router, prefix="/api", tags=["upload"])
 app.include_router(summary.router, prefix="/api", tags=["summary"])
 app.include_router(packets.router, prefix="/api", tags=["packets"])
 app.include_router(ip_mac_map.router, prefix="/api", tags=["ip-mac"])
+app.include_router(files.router, prefix="/api", tags=["files"])
 
 
 @app.get("/")
@@ -89,7 +108,8 @@ async def root():
             "upload": "/api/upload",
             "summary": "/api/summary",
             "packets": "/api/packets",
-            "ip_mac_map": "/api/ip-mac-map"
+            "ip_mac_map": "/api/ip-mac-map",
+            "files": "/api/files"
         }
     }
 
