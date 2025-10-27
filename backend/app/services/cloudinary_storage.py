@@ -157,6 +157,11 @@ class CloudinaryStorage:
                 resource_type="raw"
             )
             
+            # Check if result is None
+            if not result:
+                logger.warning(f"No data retrieved for file_id {file_id}")
+                return []
+            
             # Decompress if needed
             try:
                 # Try to decompress (gzip)
@@ -206,6 +211,10 @@ class CloudinaryStorage:
                 resource_type="raw"
             )
             
+            if not result:
+                logger.warning(f"No stats retrieved for file_id {file_id}")
+                return {}
+            
             stats = json.loads(result)
             return stats
             
@@ -235,6 +244,10 @@ class CloudinaryStorage:
                 resource_type="raw"
             )
             
+            if not result:
+                logger.warning(f"No file info retrieved for file_id {file_id}")
+                return None
+            
             file_info = json.loads(result)
             return file_info
             
@@ -256,6 +269,11 @@ class CloudinaryStorage:
                 prefix="network_analyzer/",
                 max_results=1000
             )
+            
+            # Check if result is None or has no resources
+            if not result or not isinstance(result, dict):
+                logger.warning("No resources returned from Cloudinary API")
+                return []
             
             files = []
             seen_ids = set()
@@ -321,6 +339,10 @@ class CloudinaryStorage:
                 f"{folder}/packets",
                 resource_type="raw"
             )
+            
+            if not result:
+                logger.warning(f"No packets retrieved for file_id {file_id}")
+                return 0
             
             # Decompress if needed
             try:
