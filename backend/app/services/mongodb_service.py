@@ -4,7 +4,7 @@ MongoDB service for storing file metadata
 import logging
 from typing import Optional, Dict, List
 from datetime import datetime
-from motor.motorbase import AsyncIOMotorClient, AsyncIOMotorDatabase
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
 from app.core.config import settings
 
