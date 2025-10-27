@@ -22,7 +22,6 @@ class CloudinaryStorage:
     
     def __init__(self):
         self.is_initialized = False
-        self._cache = {}  # In-memory cache for parsed data
         self._current_file_id = None
         
     def _initialize(self):
@@ -62,6 +61,10 @@ class CloudinaryStorage:
         """Store parsed file data"""
         if not self.is_initialized:
             self._initialize()
+        
+        if not self.is_initialized:
+            logger.error("Cloudinary not initialized. Cannot store file.")
+            raise RuntimeError("Cloudinary not initialized. Please check your Cloudinary credentials.")
         
         file_id = str(uuid.uuid4())
         ist_timezone = timezone(timedelta(hours=5, minutes=30))
@@ -117,19 +120,13 @@ class CloudinaryStorage:
                         overwrite=True
                     )
                 except Exception as e:
-                    logger.warning(f"Error uploading to Cloudinary: {e}. Using in-memory storage only.")
-            
-            # Store in memory cache for quick access (always)
-            self._cache[file_id] = {
-                'info': file_info,
-                'packets': packets_data,
-                'stats': stats_data
-            }
+                    logger.error(f"Error uploading to Cloudinary: {e}")
+                    raise
             
             # Set as current file
             self._current_file_id = file_id
             
-            logger.info(f"Stored file {filename} with ID {file_id}, {len(packets)} packets")
+            logger.info(f"Stored file {filename} with ID {file_id}, {len(packets)} packets in Cloudinary")
             return file_id
             
         except Exception as e:
@@ -146,26 +143,19 @@ class CloudinaryStorage:
             logger.warning("No file_id provided and no current file")
             return []
         
+        if not self.is_initialized:
+            logger.error("Cloudinary not initialized. Cannot retrieve packets.")
+            return []
+        
         try:
-            # Check cache first
-            if file_id in self._cache:
-                packets_data = self._cache[file_id]['packets']
-            else:
-                if not self.is_initialized:
-                    logger.warning(f"Cloudinary not initialized and file {file_id} not in cache")
-                    return []
-                
-                # Load from Cloudinary
-                folder = f"network_analyzer/{file_id}"
-                result = cloudinary.uploader.download(
-                    f"{folder}/packets",
-                    resource_type="raw"
-                )
-                
-                packets_data = json.loads(result)
-                # Cache for future use
-                if file_id not in self._cache:
-                    self._cache[file_id] = {'packets': packets_data}
+            # Always load from Cloudinary
+            folder = f"network_analyzer/{file_id}"
+            result = cloudinary.uploader.download(
+                f"{folder}/packets",
+                resource_type="raw"
+            )
+            
+            packets_data = json.loads(result)
             
             # Apply pagination
             paginated_data = packets_data[skip:skip + limit]
@@ -182,7 +172,7 @@ class CloudinaryStorage:
             return packets
             
         except Exception as e:
-            logger.error(f"Error retrieving packets: {e}", exc_info=True)
+            logger.error(f"Error retrieving packets from Cloudinary: {e}", exc_info=True)
             return []
     
     async def get_stats(self, file_id: Optional[str] = None) -> Dict:
@@ -195,18 +185,12 @@ class CloudinaryStorage:
             logger.warning("No file_id provided and no current file")
             return {}
         
+        if not self.is_initialized:
+            logger.error("Cloudinary not initialized. Cannot retrieve stats.")
+            return {}
+        
         try:
-            # Check cache first
-            if file_id in self._cache:
-                stats = self._cache[file_id].get('stats', {})
-                if stats:
-                    return stats
-            
-            if not self.is_initialized:
-                logger.warning(f"Cloudinary not initialized and file {file_id} not in cache")
-                return {}
-            
-            # Load from Cloudinary
+            # Always load from Cloudinary
             folder = f"network_analyzer/{file_id}"
             result = cloudinary.uploader.download(
                 f"{folder}/stats",
@@ -214,17 +198,10 @@ class CloudinaryStorage:
             )
             
             stats = json.loads(result)
-            
-            # Cache for future use
-            if file_id not in self._cache:
-                self._cache[file_id] = {'stats': stats}
-            else:
-                self._cache[file_id]['stats'] = stats
-            
             return stats
             
         except Exception as e:
-            logger.error(f"Error retrieving stats: {e}", exc_info=True)
+            logger.error(f"Error retrieving stats from Cloudinary: {e}", exc_info=True)
             return {}
     
     async def get_file_info(self, file_id: Optional[str] = None) -> Optional[Dict]:
@@ -237,16 +214,12 @@ class CloudinaryStorage:
             logger.warning("No file_id provided and no current file")
             return None
         
+        if not self.is_initialized:
+            logger.error("Cloudinary not initialized. Cannot retrieve file info.")
+            return None
+        
         try:
-            # Check cache first
-            if file_id in self._cache:
-                return self._cache[file_id].get('info')
-            
-            if not self.is_initialized:
-                logger.warning(f"Cloudinary not initialized and file {file_id} not in cache")
-                return None
-            
-            # Load from Cloudinary
+            # Always load from Cloudinary
             folder = f"network_analyzer/{file_id}"
             result = cloudinary.uploader.download(
                 f"{folder}/info",
@@ -254,33 +227,19 @@ class CloudinaryStorage:
             )
             
             file_info = json.loads(result)
-            
-            # Cache for future use
-            if file_id not in self._cache:
-                self._cache[file_id] = {'info': file_info}
-            else:
-                self._cache[file_id]['info'] = file_info
-            
             return file_info
             
         except Exception as e:
-            logger.error(f"Error retrieving file info: {e}", exc_info=True)
+            logger.error(f"Error retrieving file info from Cloudinary: {e}", exc_info=True)
             return None
     
     async def get_files_list(self, skip: int = 0, limit: int = 100) -> List[Dict]:
         """List all stored files"""
+        if not self.is_initialized:
+            logger.error("Cloudinary not initialized. Cannot list files.")
+            return []
+        
         try:
-            # If not using Cloudinary, return files from cache
-            if not self.is_initialized:
-                files = []
-                for file_id, data in self._cache.items():
-                    if 'info' in data:
-                        files.append(data['info'])
-                
-                # Sort by upload_time (descending)
-                files.sort(key=lambda x: x.get('upload_time', ''), reverse=True)
-                return files[skip:skip + limit]
-            
             # Get all files from Cloudinary
             result = cloudinary.api.resources(
                 type="upload",
@@ -316,42 +275,37 @@ class CloudinaryStorage:
     
     async def delete_file(self, file_id: str):
         """Delete file and associated data"""
+        if not self.is_initialized:
+            logger.error("Cloudinary not initialized. Cannot delete file.")
+            return
+        
         try:
-            # Always remove from cache
-            if file_id in self._cache:
-                del self._cache[file_id]
+            folder = f"network_analyzer/{file_id}"
             
-            # Delete from Cloudinary if initialized
-            if self.is_initialized:
-                folder = f"network_analyzer/{file_id}"
-                
-                # Delete all resources in the folder
-                cloudinary.api.delete_resources(
-                    [f"{folder}/info", f"{folder}/packets", f"{folder}/stats"],
-                    resource_type="raw"
-                )
+            # Delete all resources in the folder
+            cloudinary.api.delete_resources(
+                [f"{folder}/info", f"{folder}/packets", f"{folder}/stats"],
+                resource_type="raw"
+            )
             
-            logger.info(f"Deleted file {file_id} and associated data")
+            logger.info(f"Deleted file {file_id} from Cloudinary")
             
         except Exception as e:
-            logger.error(f"Error deleting file: {e}", exc_info=True)
+            logger.error(f"Error deleting file from Cloudinary: {e}", exc_info=True)
     
     async def count_packets(self, file_id: Optional[str] = None) -> int:
         """Count total packets for a file"""
         if not file_id:
+            file_id = self._current_file_id
+        
+        if not file_id:
+            return 0
+        
+        if not self.is_initialized:
+            logger.error("Cloudinary not initialized. Cannot count packets.")
             return 0
         
         try:
-            # Check cache first
-            if file_id in self._cache:
-                packets_data = self._cache[file_id].get('packets')
-                if packets_data:
-                    return len(packets_data)
-            
-            if not self.is_initialized:
-                logger.warning(f"Cloudinary not initialized and file {file_id} not in cache")
-                return 0
-            
             # Load from Cloudinary to count
             folder = f"network_analyzer/{file_id}"
             result = cloudinary.uploader.download(
@@ -360,13 +314,6 @@ class CloudinaryStorage:
             )
             
             packets_data = json.loads(result)
-            
-            # Cache for future use
-            if file_id not in self._cache:
-                self._cache[file_id] = {'packets': packets_data}
-            else:
-                self._cache[file_id]['packets'] = packets_data
-            
             return len(packets_data)
             
         except Exception as e:

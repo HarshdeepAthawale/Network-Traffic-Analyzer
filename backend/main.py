@@ -22,14 +22,34 @@ async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown events"""
     logger.info("Starting Network Traffic Analyzer backend...")
     
-    # Initialize storage
-    try:
-        from app.services.storage import storage
-        logger.info("Storage initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize storage: {e}")
+    # Initialize Cloudinary connection (required)
+    cloudinary_enabled = bool(
+        settings.CLOUDINARY_CLOUD_NAME and 
+        settings.CLOUDINARY_API_KEY and 
+        settings.CLOUDINARY_API_SECRET
+    )
+    
+    if cloudinary_enabled:
+        try:
+            from app.services.cloudinary_storage import cloudinary_storage
+            await cloudinary_storage.connect()
+            logger.info("Cloudinary initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize Cloudinary: {e}")
+            raise
+    else:
+        logger.error("Cloudinary credentials not provided. Please configure Cloudinary in your environment variables.")
+        raise RuntimeError("Cloudinary credentials are required. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.")
     
     yield
+    
+    # Close Cloudinary connection on shutdown
+    try:
+        from app.services.cloudinary_storage import cloudinary_storage
+        await cloudinary_storage.disconnect()
+        logger.info("Cloudinary disconnected")
+    except Exception as e:
+        logger.error(f"Error disconnecting from Cloudinary: {e}")
     
     logger.info("Shutting down Network Traffic Analyzer backend...")
 
