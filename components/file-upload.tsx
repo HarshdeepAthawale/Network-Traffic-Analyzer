@@ -25,8 +25,8 @@ export function FileUpload({ onAnalyzed, className }: Props) {
     setFile(f)
     setError(null)
     
-    // Upload to backend
-    await uploadFileToBackend(f)
+    // Don't auto-upload - let user click "Analyze Now"
+    // await uploadFileToBackend(f)
   }
 
   async function uploadFileToBackend(file: File) {
@@ -36,9 +36,9 @@ export function FileUpload({ onAnalyzed, className }: Props) {
       setError(null)
       
       // Show initial progress
-      setProgress(20)
+      setProgress(10)
       
-      // Upload file
+      // Upload file with progress updates
       const result = await uploadFile(file)
       
       if (result.success) {

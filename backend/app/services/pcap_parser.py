@@ -50,9 +50,23 @@ class PCAPParser:
             self.raw_packets = rdpcap(file_obj)
             logger.info(f"Loaded {len(self.raw_packets)} packets")
             
-            # Process each packet
-            for idx, pkt in enumerate(self.raw_packets):
-                self._process_packet(pkt, idx)
+            # Process packets in batches for better performance
+            batch_size = 100
+            total_packets = len(self.raw_packets)
+            
+            for batch_start in range(0, total_packets, batch_size):
+                batch_end = min(batch_start + batch_size, total_packets)
+                batch = self.raw_packets[batch_start:batch_end]
+                
+                # Process batch
+                for i, pkt in enumerate(batch):
+                    idx = batch_start + i
+                    self._process_packet(pkt, idx)
+                
+                # Log progress for large files
+                if total_packets > 1000:
+                    progress = (batch_end / total_packets) * 100
+                    logger.info(f"Progress: {progress:.1f}% ({batch_end}/{total_packets} packets)")
             
             # Calculate final statistics
             self._calculate_final_stats()
@@ -127,7 +141,7 @@ class PCAPParser:
                 size=packet_size,
                 info=self._get_packet_info(pkt, proto),
                 layers=layers,
-                hex=self._get_hex_dump(pkt)[:200]  # First 200 chars of hex
+                hex=""  # Disable hex dump to improve performance
             )
             
             self.packets.append(packet)
@@ -319,9 +333,10 @@ class PCAPParser:
         return " ".join(info_parts) if info_parts else proto
     
     def _get_hex_dump(self, pkt: ScapyPacket) -> str:
-        """Get hex dump of packet"""
+        """Get hex dump of packet (limited size for performance)"""
         raw_bytes = bytes(pkt)
-        hex_string = " ".join(f"{b:02x}" for b in raw_bytes[:100])  # First 100 bytes
+        # Limit to first 50 bytes to reduce storage size
+        hex_string = " ".join(f"{b:02x}" for b in raw_bytes[:50])
         return hex_string
     
     def _calculate_final_stats(self):

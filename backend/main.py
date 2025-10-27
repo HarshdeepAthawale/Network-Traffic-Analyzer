@@ -109,5 +109,7 @@ if __name__ == "__main__":
         "main:app",
         host=settings.HOST,
         port=settings.PORT,
-        reload=settings.DEBUG
+        reload=settings.DEBUG,
+        timeout_keep_alive=300,  # 5 minutes timeout for keep-alive connections
+        timeout_graceful_shutdown=30  # Graceful shutdown timeout
     )

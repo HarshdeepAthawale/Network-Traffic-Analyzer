@@ -4,6 +4,7 @@ Cloudinary storage service for parsed PCAP data
 import logging
 import json
 import uuid
+import gzip
 from typing import Dict, List, Optional
 from datetime import datetime, timezone, timedelta
 
@@ -102,10 +103,11 @@ class CloudinaryStorage:
                         overwrite=True
                     )
                     
-                    # Upload packets (as JSON)
+                    # Upload packets (as compressed JSON)
                     packets_json = json.dumps(packets_data)
+                    packets_compressed = gzip.compress(packets_json.encode('utf-8'))
                     cloudinary.uploader.upload(
-                        packets_json.encode('utf-8'),
+                        packets_compressed,
                         public_id=f"{folder}/packets",
                         resource_type="raw",
                         overwrite=True
@@ -155,7 +157,14 @@ class CloudinaryStorage:
                 resource_type="raw"
             )
             
-            packets_data = json.loads(result)
+            # Decompress if needed
+            try:
+                # Try to decompress (gzip)
+                result_decompressed = gzip.decompress(result)
+                packets_data = json.loads(result_decompressed)
+            except:
+                # If decompression fails, assume it's not compressed
+                packets_data = json.loads(result)
             
             # Apply pagination
             paginated_data = packets_data[skip:skip + limit]
@@ -313,7 +322,15 @@ class CloudinaryStorage:
                 resource_type="raw"
             )
             
-            packets_data = json.loads(result)
+            # Decompress if needed
+            try:
+                # Try to decompress (gzip)
+                result_decompressed = gzip.decompress(result)
+                packets_data = json.loads(result_decompressed)
+            except:
+                # If decompression fails, assume it's not compressed
+                packets_data = json.loads(result)
+            
             return len(packets_data)
             
         except Exception as e:

@@ -34,7 +34,8 @@ export async function uploadFile(file: File): Promise<{ success: boolean; fileId
     
     // Create an AbortController for timeout
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 60000) // 60 second timeout
+    // Increased timeout to 5 minutes for large PCAP files
+    const timeoutId = setTimeout(() => controller.abort(), 300000) // 300 second (5 minute) timeout
     
     const res = await fetch(`${API_BASE_URL}/api/upload`, {
       method: 'POST',
@@ -55,7 +56,7 @@ export async function uploadFile(file: File): Promise<{ success: boolean; fileId
       throw new Error('Failed to connect to server. Please check if the backend is running.')
     }
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Upload timed out. The file may be too large or the server may be unresponsive.')
+      throw new Error('Upload timed out. The file may be too large (max 500MB) or the server may be processing a large number of packets. Please try a smaller file or wait longer.')
     }
     throw error
   }
