@@ -21,7 +21,29 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown events"""
     logger.info("Starting Network Traffic Analyzer backend...")
+    
+    # Initialize Cloudinary connection (required)
+    if not settings.CLOUDINARY_CLOUD_NAME or not settings.CLOUDINARY_API_KEY or not settings.CLOUDINARY_API_SECRET:
+        raise RuntimeError("Cloudinary credentials are required. Set NTA_CLOUDINARY_CLOUD_NAME, NTA_CLOUDINARY_API_KEY, and NTA_CLOUDINARY_API_SECRET environment variables.")
+    
+    try:
+        from app.services.cloudinary_storage import cloudinary_storage
+        await cloudinary_storage.connect()
+        logger.info("Cloudinary initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize Cloudinary: {e}")
+        raise RuntimeError(f"Cloudinary initialization failed: {e}")
+    
     yield
+    
+    # Close Cloudinary connection on shutdown
+    try:
+        from app.services.cloudinary_storage import cloudinary_storage
+        await cloudinary_storage.disconnect()
+        logger.info("Cloudinary disconnected")
+    except Exception as e:
+        logger.error(f"Error disconnecting from Cloudinary: {e}")
+    
     logger.info("Shutting down Network Traffic Analyzer backend...")
 
 

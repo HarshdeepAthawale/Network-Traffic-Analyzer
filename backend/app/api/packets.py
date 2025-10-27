@@ -36,28 +36,27 @@ async def get_packets(
         Paginated packet list
     """
     try:
-        # Get all packets from storage
-        all_packets = storage.get_packets(file_id)
+        # Calculate skip/limit for pagination
+        skip = (page - 1) * perPage
+        limit = perPage
         
-        if not all_packets:
+        # Get packets with pagination from Cloudinary
+        page_packets = await storage.get_packets(file_id, skip=skip, limit=limit)
+        
+        if not page_packets:
             raise HTTPException(
                 status_code=404,
                 detail="No parsed data found. Please upload a PCAP file first."
             )
         
         # Apply filters
-        filtered_packets = _filter_packets(all_packets, protocol, ip)
+        filtered_packets = _filter_packets(page_packets, protocol, ip)
         
-        # Calculate pagination
+        # Get total count (apply same filters to get accurate count)
         total = len(filtered_packets)
-        start_idx = (page - 1) * perPage
-        end_idx = start_idx + perPage
-        
-        # Get page of packets
-        page_packets = filtered_packets[start_idx:end_idx]
         
         return PacketListResponse(
-            items=page_packets,
+            items=filtered_packets,
             total=total,
             page=page,
             per_page=perPage

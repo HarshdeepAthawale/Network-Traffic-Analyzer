@@ -1,81 +1,38 @@
 """
-Storage service for parsed PCAP data
+Storage service for parsed PCAP data - Cloudinary
 """
 import logging
-from typing import Dict, List, Optional
-from datetime import datetime, timezone, timedelta
-import uuid
-from collections import defaultdict
+from typing import Optional, Dict, List
 
 from app.models.packet import Packet
-from app.core.config import settings
+from app.services.cloudinary_storage import cloudinary_storage
 
 logger = logging.getLogger(__name__)
 
 
-class InMemoryStorage:
-    """In-memory storage for parsed PCAP data"""
+class StorageProxy:
+    """Proxy to access Cloudinary storage"""
     
-    def __init__(self):
-        self.files: Dict[str, Dict] = {}  # fileId -> file metadata
-        self.packets: Dict[str, List[Packet]] = {}  # fileId -> packets
-        self.stats: Dict[str, Dict] = {}  # fileId -> statistics
-        self.current_file_id: Optional[str] = None
+    async def store_file(self, filename: str, packets: List[Packet], stats: Dict) -> str:
+        """Store parsed file data"""
+        return await cloudinary_storage.store_file(filename, packets, stats)
     
-    def store_file(self, filename: str, packets: List[Packet], stats: Dict) -> str:
-        """Store parsed file data - clears previous data to prevent history"""
-        # Clear all previous data to prevent showing history
-        self.clear()
-        
-        file_id = str(uuid.uuid4())
-        
-        # Store metadata
-        self.files[file_id] = {
-            'id': file_id,
-            'filename': filename,
-            'upload_time': datetime.now(timezone(timedelta(hours=5, minutes=30))),
-            'packet_count': len(packets),
-            'total_bytes': stats.get('total_bytes', 0)
-        }
-        
-        # Store packets and stats
-        self.packets[file_id] = packets
-        self.stats[file_id] = stats
-        
-        # Set as current file
-        self.current_file_id = file_id
-        
-        logger.info(f"Stored file {filename} with ID {file_id}, {len(packets)} packets (cleared previous data)")
-        return file_id
+    async def get_packets(self, file_id: Optional[str] = None, skip: int = 0, limit: int = 1000) -> List[Packet]:
+        """Get packets for a file with pagination"""
+        return await cloudinary_storage.get_packets(file_id, skip=skip, limit=limit)
     
-    def get_packets(self, file_id: Optional[str] = None) -> List[Packet]:
-        """Get packets for a file"""
-        fid = file_id or self.current_file_id
-        if fid and fid in self.packets:
-            return self.packets[fid]
-        return []
-    
-    def get_stats(self, file_id: Optional[str] = None) -> Dict:
+    async def get_stats(self, file_id: Optional[str] = None) -> Dict:
         """Get statistics for a file"""
-        fid = file_id or self.current_file_id
-        if fid and fid in self.stats:
-            return self.stats[fid]
-        return {}
+        return await cloudinary_storage.get_stats(file_id)
     
-    def get_file_info(self, file_id: Optional[str] = None) -> Optional[Dict]:
+    async def get_file_info(self, file_id: Optional[str] = None) -> Optional[Dict]:
         """Get file metadata"""
-        fid = file_id or self.current_file_id
-        if fid and fid in self.files:
-            return self.files[fid]
-        return None
+        return await cloudinary_storage.get_file_info(file_id)
     
     def clear(self):
         """Clear all stored data"""
-        self.files.clear()
-        self.packets.clear()
-        self.stats.clear()
-        self.current_file_id = None
+        logger.info("Clear operation called - Cloudinary storage is persistent")
 
 
-# Global storage instance
-storage = InMemoryStorage()
+# Create global storage proxy instance
+storage = StorageProxy()

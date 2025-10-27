@@ -33,7 +33,7 @@ async def get_ip_mac_map(
     """
     try:
         # Get stats from storage
-        stats = storage.get_stats(file_id)
+        stats = await storage.get_stats(file_id)
         
         if not stats:
             raise HTTPException(

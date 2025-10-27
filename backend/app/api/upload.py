@@ -63,7 +63,7 @@ async def upload_pcap(file: UploadFile = File(...)):
             )
         
         # Store the parsed data
-        file_id = storage.store_file(file.filename, packets, stats)
+        file_id = await storage.store_file(file.filename, packets, stats)
         
         return UploadResponse(
             success=True,

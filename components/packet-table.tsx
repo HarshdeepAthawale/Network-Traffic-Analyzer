@@ -93,47 +93,57 @@ export function PacketTable({ protocol, filterIp }: { protocol: string | null; f
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="w-[90vw] max-w-2xl">
+        <SheetContent side="right" className="w-[90vw] max-w-3xl">
           <SheetHeader>
             <SheetTitle>Packet Details</SheetTitle>
           </SheetHeader>
           {selected ? (
-            <div className="mt-4 space-y-4">
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <div className="text-muted-foreground">Timestamp</div>
-                  <div className="font-medium">{selected.ts}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Protocol</div>
-                  <div className="font-medium">{selected.proto}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Source IP</div>
-                  <div className="font-medium">{selected.src}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Destination IP</div>
-                  <div className="font-medium">{selected.dst}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Size</div>
-                  <div className="font-medium">{selected.size} B</div>
+            <div className="mt-6 space-y-6">
+              {/* Summary Section */}
+              <div className="rounded-lg border bg-card p-4">
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Summary</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Timestamp</div>
+                    <div className="mt-1 font-medium">{selected.ts}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Protocol</div>
+                    <div className="mt-1 font-medium">{selected.proto}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Source IP</div>
+                    <div className="mt-1 font-medium">{selected.src}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Destination IP</div>
+                    <div className="mt-1 font-medium">{selected.dst}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-xs text-muted-foreground">Size</div>
+                    <div className="mt-1 font-medium">{selected.size} B</div>
+                  </div>
                 </div>
               </div>
 
-              <div className="rounded-lg border p-3">
-                <div className="text-sm font-medium">Layers</div>
-                <pre className="mt-2 max-h-48 overflow-auto rounded bg-muted/30 p-2 text-xs">
-                  {JSON.stringify(selected.layers || { ethernet: {}, ip: {}, transport: {}, app: {} }, null, 2)}
-                </pre>
+              {/* Layers Section */}
+              <div className="rounded-lg border bg-card p-4">
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Layers</h3>
+                <div className="max-h-64 overflow-auto rounded bg-muted/30 p-3">
+                  <pre className="text-xs font-mono">
+                    {JSON.stringify(selected.layers || { ethernet: {}, ip: {}, transport: {}, app: {} }, null, 2)}
+                  </pre>
+                </div>
               </div>
 
-              <div className="rounded-lg border p-3">
-                <div className="text-sm font-medium">Hex</div>
-                <pre className="mt-2 max-h-48 overflow-auto rounded bg-muted/30 p-2 text-xs">
-                  {selected.hex || "0000  ff aa bb cc dd ee ..."}
-                </pre>
+              {/* Hex Section */}
+              <div className="rounded-lg border bg-card p-4">
+                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Hex</h3>
+                <div className="max-h-64 overflow-auto rounded bg-muted/30 p-3">
+                  <pre className="text-xs font-mono">
+                    {selected.hex || "0000  ff aa bb cc dd ee ..."}
+                  </pre>
+                </div>
               </div>
             </div>
           ) : null}

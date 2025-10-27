@@ -25,6 +25,28 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+3. Configure environment (optional):
+```bash
+# Copy the example environment file
+cp env.example .env
+
+# Edit .env to set your configuration
+```
+
+### Cloudinary Setup (Required)
+
+The application requires Cloudinary for file storage.
+
+1. Sign up for a free Cloudinary account at https://cloudinary.com/users/register/free
+2. Go to your dashboard at https://console.cloudinary.com
+3. Copy your credentials (Cloud Name, API Key, API Secret)
+4. Set the following environment variables:
+   ```bash
+   NTA_CLOUDINARY_CLOUD_NAME=your_cloud_name
+   NTA_CLOUDINARY_API_KEY=your_api_key
+   NTA_CLOUDINARY_API_SECRET=your_api_secret
+   ```
+
 ## Running the Backend
 
 ### Development mode:
@@ -60,7 +82,11 @@ Once running, visit:
 - `NTA_HOST` - Host to bind to (default: 0.0.0.0)
 - `NTA_PORT` - Port to bind to (default: 8000)
 - `NTA_DEBUG` - Debug mode (default: True)
-- `NTA_MAX_UPLOAD_SIZE` - Max upload file size in bytes (default: 100MB)
+- `NTA_MAX_UPLOAD_SIZE` - Max upload file size in bytes (default: 500MB)
+- `NTA_CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name (required)
+- `NTA_CLOUDINARY_API_KEY` - Cloudinary API key (required)
+- `NTA_CLOUDINARY_API_SECRET` - Cloudinary API secret (required)
+- `NTA_CORS_ORIGINS` - CORS allowed origins (default: *)
 
 ## Frontend Integration
 
@@ -75,7 +101,7 @@ backend/
 │   ├── api/           # API endpoint routes
 │   ├── core/          # Core configuration and utilities
 │   ├── models/        # Pydantic data models
-│   └── services/      # Business logic services
+│   └── services/      # Business logic services (Cloudinary storage)
 ├── logs/              # Application logs
 ├── main.py            # FastAPI application entry point
 ├── requirements.txt   # Python dependencies
@@ -96,9 +122,9 @@ You can test the backend using sample PCAP files from:
 
 ## Future Enhancements
 
-- Database persistence (SQLite/PostgreSQL)
 - Real-time packet capture mode
 - WebSocket support for live updates
 - Export functionality (CSV, JSON)
 - Advanced filtering and search
 - Performance optimizations for large files
+- Multiple file comparison and analysis
