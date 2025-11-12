@@ -18,13 +18,6 @@ services:
         value: "*"
       - key: PYTHON_VERSION
         value: 3.11.9
-      # Cloudinary credentials - Add these in Render dashboard (don't commit secrets!)
-      - key: NTA_CLOUDINARY_CLOUD_NAME
-        sync: false  # Will be set in dashboard
-      - key: NTA_CLOUDINARY_API_KEY
-        sync: false  # Will be set in dashboard
-      - key: NTA_CLOUDINARY_API_SECRET
-        sync: false  # Will be set in dashboard
       - key: NTA_MONGODB_URI
         sync: false  # Will be set in dashboard
       - key: NTA_MONGODB_DATABASE

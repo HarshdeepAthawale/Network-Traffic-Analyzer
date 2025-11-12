@@ -34,8 +34,8 @@ async def get_summary(file_id: str = None):
     try:
         # Get stats from storage
         stats = await storage.get_stats(file_id)
-        # Get all packets for statistics calculation (use large limit)
-        packets = await storage.get_packets(file_id, skip=0, limit=100000)
+        # Get all packets for statistics calculation
+        packets = await storage.get_all_packets(file_id)
         
         if not stats:
             raise HTTPException(

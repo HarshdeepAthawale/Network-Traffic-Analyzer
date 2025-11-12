@@ -2,10 +2,10 @@
 Packets list API endpoint with pagination and filtering
 """
 import logging
-from typing import List, Optional
+from typing import Optional
 from fastapi import APIRouter, Query, HTTPException
 
-from app.models.packet import Packet, PacketListResponse
+from app.models.packet import PacketListResponse
 from app.services.storage import storage
 from app.core.config import settings
 
@@ -40,23 +40,23 @@ async def get_packets(
         skip = (page - 1) * perPage
         limit = perPage
         
-        # Get packets with pagination from Cloudinary
-        page_packets = await storage.get_packets(file_id, skip=skip, limit=limit)
-        
-        if not page_packets:
+        # Get packets with pagination from MongoDB
+        packets, total = await storage.get_packets(
+            file_id=file_id,
+            skip=skip,
+            limit=limit,
+            protocol=protocol,
+            ip_query=ip,
+        )
+
+        if total == 0:
             raise HTTPException(
                 status_code=404,
                 detail="No parsed data found. Please upload a PCAP file first."
             )
         
-        # Apply filters
-        filtered_packets = _filter_packets(page_packets, protocol, ip)
-        
-        # Get total count (apply same filters to get accurate count)
-        total = len(filtered_packets)
-        
         return PacketListResponse(
-            items=filtered_packets,
+            items=packets,
             total=total,
             page=page,
             per_page=perPage
@@ -70,19 +70,3 @@ async def get_packets(
             status_code=500,
             detail=f"Error retrieving packets: {str(e)}"
         )
-
-
-def _filter_packets(packets: List[Packet], protocol: Optional[str], ip: Optional[str]) -> List[Packet]:
-    """Apply filters to packet list"""
-    filtered = packets
-    
-    # Filter by protocol
-    if protocol:
-        protocol_upper = protocol.upper()
-        filtered = [p for p in filtered if p.proto.upper() == protocol_upper]
-    
-    # Filter by IP (source or destination)
-    if ip:
-        filtered = [p for p in filtered if ip in p.src or ip in p.dst]
-    
-    return filtered

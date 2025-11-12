@@ -3,7 +3,7 @@ FastAPI Backend for Network Traffic Analyzer
 """
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, File, UploadFile, Query, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
@@ -21,26 +21,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown events"""
     logger.info("Starting Network Traffic Analyzer backend...")
-    
-    # Initialize Cloudinary connection (required)
-    cloudinary_enabled = bool(
-        settings.CLOUDINARY_CLOUD_NAME and 
-        settings.CLOUDINARY_API_KEY and 
-        settings.CLOUDINARY_API_SECRET
-    )
-    
-    if cloudinary_enabled:
-        try:
-            from app.services.cloudinary_storage import cloudinary_storage
-            await cloudinary_storage.connect()
-            logger.info("Cloudinary initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize Cloudinary: {e}")
-            raise
-    else:
-        logger.error("Cloudinary credentials not provided. Please configure Cloudinary in your environment variables.")
-        raise RuntimeError("Cloudinary credentials are required. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.")
-    
+
     # Initialize MongoDB connection
     try:
         from app.services.mongodb_service import mongodb_service
@@ -48,11 +29,10 @@ async def lifespan(app: FastAPI):
         logger.info("MongoDB initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize MongoDB: {e}")
-        logger.warning("App will continue without MongoDB. File upload/parsing will work, but metadata storage may be limited.")
-        # Don't raise - allow app to start without MongoDB
-    
+        raise RuntimeError("MongoDB connection is required for the backend to start.") from e
+
     yield
-    
+
     # Close MongoDB connection on shutdown
     try:
         from app.services.mongodb_service import mongodb_service
@@ -60,15 +40,7 @@ async def lifespan(app: FastAPI):
         logger.info("MongoDB disconnected")
     except Exception as e:
         logger.error(f"Error disconnecting from MongoDB: {e}")
-    
-    # Close Cloudinary connection on shutdown
-    try:
-        from app.services.cloudinary_storage import cloudinary_storage
-        await cloudinary_storage.disconnect()
-        logger.info("Cloudinary disconnected")
-    except Exception as e:
-        logger.error(f"Error disconnecting from Cloudinary: {e}")
-    
+
     logger.info("Shutting down Network Traffic Analyzer backend...")
 
 

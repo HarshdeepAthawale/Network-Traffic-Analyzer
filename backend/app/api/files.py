@@ -2,11 +2,11 @@
 Files API endpoint - list and manage uploaded files
 """
 import logging
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Query, HTTPException
 from pydantic import BaseModel
 
-from app.services.mongodb_service import mongodb_service
+from app.services.storage import storage
 
 logger = logging.getLogger(__name__)
 
@@ -15,12 +15,13 @@ router = APIRouter()
 
 class FileMetadata(BaseModel):
     """File metadata model"""
+
     file_id: str
     filename: str
-    url: str
     size: int
     user: str
-    upload_date: str
+    upload_date: Optional[str] = None
+    last_processed_at: Optional[str] = None
     has_parsed_data: bool = False
     packet_count: int = 0
 
@@ -47,7 +48,7 @@ async def list_files(
         List of file metadata
     """
     try:
-        files = await mongodb_service.list_files(skip=skip, limit=limit)
+        files = await storage.list_files(skip=skip, limit=limit)
         
         # Convert to response format
         file_list = []
@@ -55,10 +56,10 @@ async def list_files(
             metadata = FileMetadata(
                 file_id=file.get("file_id", ""),
                 filename=file.get("filename", ""),
-                url=file.get("url", ""),
                 size=file.get("size", 0),
                 user=file.get("user", "unknown"),
                 upload_date=file.get("upload_date", ""),
+                last_processed_at=file.get("last_processed_at"),
                 has_parsed_data=file.get("has_parsed_data", False),
                 packet_count=file.get("packet_count", 0)
             )
@@ -89,7 +90,7 @@ async def get_file(file_id: str):
         File metadata
     """
     try:
-        file_metadata = await mongodb_service.get_file_metadata(file_id)
+        file_metadata = await storage.get_file_info(file_id)
         
         if not file_metadata:
             raise HTTPException(
@@ -100,10 +101,10 @@ async def get_file(file_id: str):
         return FileMetadata(
             file_id=file_metadata.get("file_id", ""),
             filename=file_metadata.get("filename", ""),
-            url=file_metadata.get("url", ""),
             size=file_metadata.get("size", 0),
             user=file_metadata.get("user", "unknown"),
             upload_date=file_metadata.get("upload_date", ""),
+            last_processed_at=file_metadata.get("last_processed_at"),
             has_parsed_data=file_metadata.get("has_parsed_data", False),
             packet_count=file_metadata.get("packet_count", 0)
         )

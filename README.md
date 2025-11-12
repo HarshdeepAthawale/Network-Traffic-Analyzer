@@ -38,6 +38,13 @@ Upload .pcap/.pcapng files and get comprehensive network insights within seconds
 - Mobile-friendly design
 - Real-time data updates without page refresh
 
+## Stack
+
+- Backend: FastAPI with async MongoDB persistence (Motor)
+- Frontend: Next.js App Router hosted on Vercel
+- Database: MongoDB Atlas or self-managed deployment
+- Hosting: Render for the API, Vercel for the dashboard
+
 ## Quick Start
 
 ```bash
@@ -50,15 +57,21 @@ cd backend
 python -m venv venv
 venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-python main.py
+# configure backend/.env (see backend/env.example)
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 # Frontend (Terminal 2)
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000 and upload your first PCAP file!
+Set `NEXT_PUBLIC_API_URL=http://localhost:8000` when running the frontend locally. Open http://localhost:3000 and upload your first PCAP file!
 
+## Deployment
+
+- **Render (backend)**: Deploy with `render.yaml`. Configure `NTA_MONGODB_URI`, `NTA_MONGODB_DATABASE`, `NTA_CORS_ORIGINS`, and any other FastAPI settings in the Render dashboard. The service builds with `pip install -r requirements.txt` and runs `uvicorn main:app --host 0.0.0.0 --port $PORT`.
+- **Vercel (frontend)**: Set `NEXT_PUBLIC_API_URL` to the Render backend URL (e.g., `https://network-traffic-analyzer-backend.onrender.com`). Deploy via Vercel; the dashboard fetches data at runtime via `fetch` with `cache: "no-store"`.
+- **MongoDB**: Use MongoDB Atlas or another hosted instance. Ensure Render outbound IPs are allowed, and URL-encode sensitive characters in the connection string added to `NTA_MONGODB_URI`.
 
 ## Contributing
 

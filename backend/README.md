@@ -33,23 +33,9 @@ cp env.example .env
 # Edit .env to set your configuration
 ```
 
-### Cloudinary Setup (Required)
-
-The application requires Cloudinary for file storage.
-
-1. Sign up for a free Cloudinary account at https://cloudinary.com/users/register/free
-2. Go to your dashboard at https://console.cloudinary.com
-3. Copy your credentials (Cloud Name, API Key, API Secret)
-4. Set the following environment variables:
-   ```bash
-   NTA_CLOUDINARY_CLOUD_NAME=your_cloud_name
-   NTA_CLOUDINARY_API_KEY=your_api_key
-   NTA_CLOUDINARY_API_SECRET=your_api_secret
-   ```
-
 ### MongoDB Setup (Required)
 
-The application requires MongoDB for metadata storage.
+The application requires MongoDB for metadata, parsed packets, and statistics storage.
 
 **Option A: Local MongoDB (Recommended for Development)**
 
@@ -70,8 +56,6 @@ Set environment variables:
 NTA_MONGODB_URI=mongodb://localhost:27017/
 NTA_MONGODB_DATABASE=network_analyzer
 ```
-
-**Full Setup Documentation:** See [CLOUDINARY_SETUP.md](./CLOUDINARY_SETUP.md) for detailed instructions.
 
 ## Running the Backend
 
@@ -111,9 +95,6 @@ Once running, visit:
 - `NTA_PORT` - Port to bind to (default: 8000)
 - `NTA_DEBUG` - Debug mode (default: True)
 - `NTA_MAX_UPLOAD_SIZE` - Max upload file size in bytes (default: 500MB)
-- `NTA_CLOUDINARY_CLOUD_NAME` - Cloudinary cloud name (required)
-- `NTA_CLOUDINARY_API_KEY` - Cloudinary API key (required)
-- `NTA_CLOUDINARY_API_SECRET` - Cloudinary API secret (required)
 - `NTA_MONGODB_URI` - MongoDB connection string (default: mongodb://localhost:27017/)
 - `NTA_MONGODB_DATABASE` - MongoDB database name (default: network_analyzer)
 - `NTA_CORS_ORIGINS` - CORS allowed origins (default: *)
@@ -131,7 +112,7 @@ backend/
 │   ├── api/           # API endpoint routes
 │   ├── core/          # Core configuration and utilities
 │   ├── models/        # Pydantic data models
-│   └── services/      # Business logic services (Cloudinary + MongoDB)
+│   └── services/      # Business logic services (MongoDB persistence, parsing, lookups)
 ├── logs/              # Application logs
 ├── main.py            # FastAPI application entry point
 ├── requirements.txt   # Python dependencies
